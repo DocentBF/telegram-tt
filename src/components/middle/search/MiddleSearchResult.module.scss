@@ -64,3 +64,11 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.mediaPreview {
+  width: 5rem;
+  height: 5rem;
+  border-radius: 0.5rem;
+  object-fit: cover;
+  flex-shrink: 0;
+}

@@ -8,6 +8,9 @@ import renderText from '../../common/helpers/renderText';
 
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useThumbnail from '../../../hooks/media/useThumbnail';
+import useMessageMediaHash from '../../../hooks/media/useMessageMediaHash';
+import useMedia from '../../../hooks/useMedia';
 
 import Avatar from '../../common/Avatar';
 import FullNameTitle from '../../common/FullNameTitle';
@@ -28,6 +31,34 @@ type OwnProps = {
 };
 
 const TRUNCATE_LENGTH = 200;
+
+const MessageMediaPreview = ({ message }: { message: ApiMessage }) => {
+  const thumbDataUri = useThumbnail(message);
+  const mediaHash = useMessageMediaHash(message, 'preview');
+  const mediaBlobUrl = useMedia(mediaHash, false);
+
+  const hasMedia = message.content.photo || message.content.video || message.content.document || message.content.sticker;
+
+  if (!hasMedia) {
+    return null;
+  }
+
+  const imageSrc = mediaBlobUrl || thumbDataUri;
+
+  if (!imageSrc) {
+    return null;
+  }
+
+  return (
+    <img
+      src={imageSrc}
+      className={styles.mediaPreview}
+      alt=""
+      draggable={false}
+      decoding="async"
+    />
+  );
+};
 
 const MiddleSearchResult = ({
   isActive,
@@ -57,12 +88,15 @@ const MiddleSearchResult = ({
       className={buildClassName(styles.root, isActive && styles.active, className)}
       onClick={handleClick}
     >
-      <Avatar
-        className={styles.avatar}
-        peer={peer}
-        text={hiddenForwardTitle}
-        size="medium"
-      />
+      <MessageMediaPreview message={message} />
+      {!message.content.photo && !message.content.video && !message.content.document && !message.content.sticker && (
+        <Avatar
+          className={styles.avatar}
+          peer={peer}
+          text={hiddenForwardTitle}
+          size="medium"
+        />
+      )}
       <div className={styles.info}>
         <div className={styles.topRow}>
           {(peer && <FullNameTitle peer={peer} withEmojiStatus />) || hiddenForwardTitle}
